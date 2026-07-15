@@ -23,9 +23,9 @@ Return JSON in this exact structure:
   "summary": "short summary of the user's goal",
   "intents": [
     {{
-      "label": "Coffee stop",
-      "category": "coffee",
-      "estimated_minutes": 15,
+      "label": "Get a haircut",
+      "category": "barbershop",
+      "estimated_minutes": 45,
       "reason": "Why this stop is needed"
     }}
   ],
@@ -34,18 +34,41 @@ Return JSON in this exact structure:
 }}
 
 Allowed categories:
-- coffee
-- food
-- groceries
+- coffee_shop
+- restaurant
+- grocery_store
+- warehouse_store
 - shipping
 - pharmacy
+- bookstore
 - office_supplies
+- barbershop
+- hair_salon
+- golf_course
+- gym
+- park
+- gas_station
+- bank
+- electronics_store
+- home_improvement
+- clothing_store
+- department_store
+- car_wash
+- doctor
+- dentist
+- urgent_care
+- movie_theater
+- museum
+- hotel
+- airport
 
 Rules:
-- Create 3 to 6 intents.
+- Create 2 to 6 intents.
 - Use only allowed categories.
-- Do not create place names.
-- Do not create search queries.
+- If the user says Costco, use warehouse_store.
+- If the user says haircut, use barbershop.
+- If the user says golf or 18 holes, use golf_course.
+- If the user says food, lunch, dinner, or meal, use restaurant.
 - Do not invent business names.
 - The backend will find the actual nearby location.
 - Return only valid JSON.

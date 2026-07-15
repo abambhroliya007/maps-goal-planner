@@ -2,17 +2,38 @@ import math
 import time
 import requests
 
-from app.services.ranking_service import rank_candidates, choose_best_candidate
+from app.services.ranking_service import rank_candidates
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
 CATEGORY_SEARCH_TERMS = {
-    "coffee": ["Starbucks", "Peet's Coffee", "coffee shop", "cafe"],
-    "food": ["restaurant", "cafe", "sandwich shop", "Chipotle"],
-    "groceries": ["grocery store", "Safeway", "Trader Joe's", "Target"],
+    "coffee_shop": ["Starbucks", "Peet's Coffee", "coffee shop", "cafe"],
+    "restaurant": ["restaurant", "cafe", "sandwich shop", "Chipotle"],
+    "grocery_store": ["grocery store", "Safeway", "Trader Joe's", "Walmart"],
+    "warehouse_store": ["Costco", "Sam's Club", "warehouse store"],
     "shipping": ["UPS Store", "FedEx Office", "post office", "USPS"],
     "pharmacy": ["CVS Pharmacy", "Walgreens", "pharmacy"],
-    "office_supplies": ["bookstore", "college bookstore", "Staples", "Target"],
+    "bookstore": ["bookstore", "college bookstore", "Barnes & Noble"],
+    "office_supplies": ["Staples", "Office Depot", "office supply store", "Target"],
+    "barbershop": ["barbershop", "Sport Clips", "Great Clips", "Supercuts"],
+    "hair_salon": ["hair salon", "barbershop", "Great Clips", "Supercuts"],
+    "golf_course": ["golf course", "public golf course", "country club"],
+    "gym": ["gym", "fitness center", "Planet Fitness", "24 Hour Fitness"],
+    "park": ["park", "public park"],
+    "gas_station": ["gas station", "Chevron", "Shell"],
+    "bank": ["bank", "Chase Bank", "Bank of America", "Wells Fargo"],
+    "electronics_store": ["Best Buy", "electronics store", "Apple Store"],
+    "home_improvement": ["Home Depot", "Lowe's", "hardware store"],
+    "clothing_store": ["clothing store", "department store", "Macy's"],
+    "department_store": ["Target", "Walmart", "Macy's"],
+    "car_wash": ["car wash"],
+    "doctor": ["doctor office", "medical clinic"],
+    "dentist": ["dentist", "dental office"],
+    "urgent_care": ["urgent care", "medical clinic"],
+    "movie_theater": ["movie theater", "cinema", "AMC"],
+    "museum": ["museum"],
+    "hotel": ["hotel"],
+    "airport": ["airport"],
 }
 
 
@@ -86,7 +107,7 @@ def search_places_near_category(
                 lon = float(result["lon"])
                 distance = haversine_miles(start_lat, start_lon, lat, lon)
 
-                if distance > 25:
+                if distance > 35:
                     continue
 
                 candidates.append(
@@ -134,19 +155,3 @@ def get_ranked_places_for_category(
         "selected": ranked[0],
         "alternatives": ranked[1:4],
     }
-
-
-def choose_best_place_for_category(
-    category: str,
-    start_lat: float,
-    start_lon: float,
-    city_context: str,
-):
-    ranked_places = get_ranked_places_for_category(
-        category=category,
-        start_lat=start_lat,
-        start_lon=start_lon,
-        city_context=city_context,
-    )
-
-    return ranked_places["selected"]
