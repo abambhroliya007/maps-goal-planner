@@ -10,10 +10,9 @@ CATEGORY_SEARCH_TERMS = {
     "coffee": ["Starbucks", "Peet's Coffee", "Temple Coffee Roasters", "coffee shop"],
     "food": ["restaurant", "lunch", "food"],
     "groceries": ["grocery store", "Safeway", "Trader Joe's"],
-    "shipping": ["UPS Store", "FedEx Office", "shipping store"],
+    "shipping": ["UPS Store", "FedEx Office", "post office", "shipping store"],
     "pharmacy": ["pharmacy", "CVS Pharmacy", "Walgreens"],
-    "office_supplies": ["bookstore", "office supply store", "Staples", "Office Depot"],
-}
+    "office_supplies": ["bookstore", "office supply store", "Staples", "Target", "CVS"],}
 
 
 def haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -97,11 +96,13 @@ def choose_best_place_for_category(
     category: str,
     start_lat: float,
     start_lon: float,
+    city_context: str,
 ):
     candidates = search_places_near_category(
         category=category,
         start_lat=start_lat,
         start_lon=start_lon,
+        city_context=city_context,
     )
 
     return choose_best_candidate(candidates)

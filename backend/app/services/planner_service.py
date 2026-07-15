@@ -24,10 +24,11 @@ def create_goal_plan(user_goal: str, start_location: str) -> dict:
 
     for intent in ai_plan["intents"]:
         selected_place = choose_best_place_for_category(
-            category=intent["category"],
-            start_lat=start_geo["lat"],
-            start_lon=start_geo["lon"],
-        )
+    category=intent["category"],
+    start_lat=start_geo["lat"],
+    start_lon=start_geo["lon"],
+    city_context=start_location,
+)
 
         if selected_place:
             stop = {
