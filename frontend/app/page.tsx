@@ -13,6 +13,16 @@ const MapView = dynamic(() => import("./components/map/MapView"), {
   ssr: false,
 });
 
+type PlaceOption = {
+  name: string;
+  display_name: string;
+  lat: number;
+  lon: number;
+  distance_miles: number;
+  score: number;
+  confidence: number;
+};
+
 type Stop = {
   name: string;
   query: string;
@@ -20,6 +30,8 @@ type Stop = {
   reason: string;
   lat?: number | null;
   lon?: number | null;
+  selected_place?: PlaceOption | null;
+  alternatives?: PlaceOption[];
 };
 
 type PlanResponse = {

@@ -2,7 +2,7 @@ import math
 import time
 import requests
 
-from app.services.ranking_service import choose_best_candidate
+from app.services.ranking_service import rank_candidates, choose_best_candidate
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
@@ -37,7 +37,6 @@ def haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float
 
 def build_search_contexts(city_context: str) -> list[str]:
     parts = [part.strip() for part in city_context.split(",")]
-
     contexts = [city_context]
 
     if len(parts) >= 2:
@@ -110,7 +109,7 @@ def search_places_near_category(
     return list(unique_candidates.values())
 
 
-def choose_best_place_for_category(
+def get_ranked_places_for_category(
     category: str,
     start_lat: float,
     start_lon: float,
@@ -123,4 +122,31 @@ def choose_best_place_for_category(
         city_context=city_context,
     )
 
-    return choose_best_candidate(candidates)
+    ranked = rank_candidates(candidates)
+
+    if not ranked:
+        return {
+            "selected": None,
+            "alternatives": [],
+        }
+
+    return {
+        "selected": ranked[0],
+        "alternatives": ranked[1:4],
+    }
+
+
+def choose_best_place_for_category(
+    category: str,
+    start_lat: float,
+    start_lon: float,
+    city_context: str,
+):
+    ranked_places = get_ranked_places_for_category(
+        category=category,
+        start_lat=start_lat,
+        start_lon=start_lon,
+        city_context=city_context,
+    )
+
+    return ranked_places["selected"]

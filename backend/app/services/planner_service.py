@@ -1,7 +1,19 @@
 from app.services.ai_service import generate_ai_plan
 from app.services.geocoding_service import geocode_place
-from app.services.place_search_service import choose_best_place_for_category
+from app.services.place_search_service import get_ranked_places_for_category
 from app.services.routing_service import get_route
+
+
+def clean_place_option(place: dict) -> dict:
+    return {
+        "name": place.get("name"),
+        "display_name": place.get("display_name"),
+        "lat": place.get("lat"),
+        "lon": place.get("lon"),
+        "distance_miles": place.get("distance_miles"),
+        "score": place.get("score"),
+        "confidence": place.get("confidence"),
+    }
 
 
 def create_goal_plan(user_goal: str, start_location: str) -> dict:
@@ -23,21 +35,28 @@ def create_goal_plan(user_goal: str, start_location: str) -> dict:
     geocoded_stops = []
 
     for intent in ai_plan["intents"]:
-        selected_place = choose_best_place_for_category(
-    category=intent["category"],
-    start_lat=start_geo["lat"],
-    start_lon=start_geo["lon"],
-    city_context=start_location,
-)
+        ranked_places = get_ranked_places_for_category(
+            category=intent["category"],
+            start_lat=start_geo["lat"],
+            start_lon=start_geo["lon"],
+            city_context=start_location,
+        )
+
+        selected_place = ranked_places["selected"]
+        alternatives = ranked_places["alternatives"]
 
         if selected_place:
             stop = {
                 "name": intent["label"],
                 "query": selected_place["display_name"],
                 "estimated_minutes": intent["estimated_minutes"],
-                "reason": f"{intent['reason']} Selected {selected_place['name']} with a score of {selected_place['score']}/100 because it is {selected_place['distance_miles']} miles away and matches the requested category.",
+                "reason": intent["reason"],
                 "lat": selected_place["lat"],
                 "lon": selected_place["lon"],
+                "selected_place": clean_place_option(selected_place),
+                "alternatives": [
+                    clean_place_option(place) for place in alternatives
+                ],
             }
         else:
             stop = {
@@ -47,6 +66,8 @@ def create_goal_plan(user_goal: str, start_location: str) -> dict:
                 "reason": intent["reason"],
                 "lat": None,
                 "lon": None,
+                "selected_place": None,
+                "alternatives": [],
             }
 
         geocoded_stops.append(stop)
