@@ -1,12 +1,21 @@
 # Maps: Goal Planner
 
-An AI-powered goal-based trip planner that helps users turn real-life goals into optimized routes and itineraries.
+An AI-powered goal-based trip planner that turns real-life goals into optimized routes, ranked place recommendations, timelines, and explainable decisions.
 
-Instead of searching one destination at a time, users can describe a goal like:
+## What it does
 
-> I have 3 hours. I need coffee, groceries, UPS, and a pharmacy.
+Instead of searching one destination at a time, users describe a goal:
 
-The app extracts destinations, finds locations, plans an optimized route, and generates a timeline.
+> I have 2 hours before class. I need lunch, coffee, notebooks, and to return a package.
+
+The app generates:
+
+- Recommended stops
+- Ranked alternatives
+- Confidence scores
+- Route distance and driving time
+- Timeline
+- Interactive map with numbered pins
 
 ## Tech Stack
 
@@ -14,6 +23,7 @@ Frontend:
 - Next.js
 - TypeScript
 - Tailwind CSS
+- shadcn/ui
 - Leaflet
 - OpenStreetMap
 
@@ -22,6 +32,15 @@ Backend:
 - OpenAI API
 - Nominatim
 - OSRM
+
+## Core AI Flow
+
+User Goal  
+→ Intent Extraction  
+→ Nearby Place Search  
+→ Candidate Ranking  
+→ Route Optimization  
+→ Timeline + Explanation
 
 ## Disclaimer
 
