@@ -1,6 +1,14 @@
 "use client";
 
-import { MapContainer, Marker, Polyline, Popup, TileLayer } from "react-leaflet";
+import { useEffect } from "react";
+import {
+  MapContainer,
+  Marker,
+  Polyline,
+  Popup,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -23,12 +31,50 @@ type Props = {
   route?: RouteGeometry | null;
 };
 
-const markerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+function createNumberedIcon(number: number) {
+  return L.divIcon({
+    className: "",
+    html: `
+      <div style="
+        height: 34px;
+        width: 34px;
+        border-radius: 9999px;
+        background: #facc15;
+        color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        border: 3px solid white;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      ">
+        ${number}
+      </div>
+    `,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+  });
+}
+
+function FitBounds({ stops }: { stops: Stop[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const validStops = stops.filter((stop) => stop.lat && stop.lon);
+
+    if (validStops.length > 1) {
+      const bounds = validStops.map(
+        (stop) => [stop.lat as number, stop.lon as number] as [number, number]
+      );
+
+      map.fitBounds(bounds, {
+        padding: [60, 60],
+      });
+    }
+  }, [map, stops]);
+
+  return null;
+}
 
 export default function MapView({ stops, route }: Props) {
   const validStops = stops.filter((stop) => stop.lat && stop.lon);
@@ -39,8 +85,9 @@ export default function MapView({ stops, route }: Props) {
       : [38.5816, -121.4944];
 
   const routePositions =
-    route?.coordinates?.map((coord) => [coord[1], coord[0]] as [number, number]) ||
-    [];
+    route?.coordinates?.map(
+      (coord) => [coord[1], coord[0]] as [number, number]
+    ) || [];
 
   return (
     <div className="h-full min-h-[650px] w-full overflow-hidden rounded-2xl">
@@ -50,23 +97,27 @@ export default function MapView({ stops, route }: Props) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <FitBounds stops={validStops} />
+
         {validStops.map((stop, index) => (
           <Marker
             key={`${stop.name}-${index}`}
             position={[stop.lat as number, stop.lon as number]}
-            icon={markerIcon}
+            icon={createNumberedIcon(index + 1)}
           >
             <Popup>
               <strong>
                 {index + 1}. {stop.name}
               </strong>
               <br />
-              {stop.query}
+              {stop.query.split(",").slice(0, 3).join(",")}
             </Popup>
           </Marker>
         ))}
 
-        {routePositions.length > 0 && <Polyline positions={routePositions} />}
+        {routePositions.length > 0 && (
+          <Polyline positions={routePositions} weight={5} color="#2563eb" />
+        )}
       </MapContainer>
     </div>
   );

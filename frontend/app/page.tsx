@@ -1,11 +1,12 @@
 "use client";
 
-import PlanningLoader from "./components/shared/PlanningLoader";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+
 import Header from "./components/layout/Header";
 import GoalInput from "./components/planner/GoalInput";
 import PlanningPanel from "./components/planner/PlanningPanel";
+import PlanningLoader from "./components/shared/PlanningLoader";
 import TimelinePanel from "./components/timeline/TimelinePanel";
 
 const MapView = dynamic(() => import("./components/map/MapView"), {
@@ -38,9 +39,11 @@ export default function Home() {
   const [startLocation, setStartLocation] = useState(
     "Sacramento State, Sacramento, CA"
   );
+
   const [goal, setGoal] = useState(
     "I have 2 hours before class. I need lunch, coffee, notebooks, and to return a package."
   );
+
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -49,25 +52,22 @@ export default function Home() {
     setPlan(null);
 
     try {
-      const res = await fetch(
-        "http://127.0.0.1:8000/api/v1/plan",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_goal: goal,
-            start_location: startLocation,
-          }),
-        }
-      );
+      const res = await fetch("http://127.0.0.1:8000/api/v1/plan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_goal: goal,
+          start_location: startLocation,
+        }),
+      });
 
       if (!res.ok) {
         throw new Error("Failed to generate plan");
       }
 
-      const data = await res.json();
+      const data: PlanResponse = await res.json();
       setPlan(data);
     } catch (error) {
       console.error(error);
@@ -97,10 +97,10 @@ export default function Home() {
       </section>
 
       {loading && (
-  <section className="mx-auto max-w-7xl px-6 pb-10">
-    <PlanningLoader />
-  </section>
-)}
+        <section className="mx-auto max-w-7xl px-6 pb-10">
+          <PlanningLoader />
+        </section>
+      )}
 
       {plan && (
         <section className="mx-auto grid max-w-7xl gap-6 px-6 pb-10 lg:grid-cols-2">
