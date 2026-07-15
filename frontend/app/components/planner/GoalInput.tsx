@@ -20,43 +20,51 @@ export default function GoalInput({
   onGenerate,
 }: Props) {
   return (
-    <section className="rounded-2xl border border-neutral-800 bg-neutral-950/80 p-5 shadow-2xl">
+    <section className="rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 shadow-2xl">
       <div>
-        <p className="text-sm font-medium text-yellow-400">AI Goal Planner</p>
-        <h2 className="mt-2 text-2xl font-semibold text-white">
-          What do you need to accomplish?
+        <p className="text-sm font-medium text-yellow-400">Plan smarter</p>
+
+        <h2 className="mt-2 text-3xl font-bold tracking-tight text-white">
+          What do you need to get done?
         </h2>
-        <p className="mt-2 text-sm text-neutral-400">
-          Describe your real-life goal. The AI will turn it into stops,
-          timing, and a route.
+
+        <p className="mt-3 text-sm leading-6 text-neutral-400">
+          Describe your goal naturally. The planner finds places, ranks options,
+          maps the route, and builds a timeline.
         </p>
       </div>
 
-      <div className="mt-6 space-y-5">
+      <div className="mt-7 space-y-5">
         <div>
-          <label className="text-sm text-neutral-300">Starting location</label>
+          <label className="text-sm font-medium text-neutral-300">
+            Starting location
+          </label>
           <input
             value={startLocation}
             onChange={(e) => setStartLocation(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white outline-none transition focus:border-yellow-400"
+            className="mt-2 w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-4 text-sm text-white outline-none transition placeholder:text-neutral-600 focus:border-yellow-400"
+            placeholder="Sacramento State, Sacramento, CA"
           />
         </div>
 
         <div>
-          <label className="text-sm text-neutral-300">Goal</label>
+          <label className="text-sm font-medium text-neutral-300">
+            Goal
+          </label>
           <textarea
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
-            className="mt-2 min-h-36 w-full resize-none rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white outline-none transition focus:border-yellow-400"
+            className="mt-2 min-h-40 w-full resize-none rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-4 text-sm leading-6 text-white outline-none transition placeholder:text-neutral-600 focus:border-yellow-400"
+            placeholder="I have 2 hours before class. I need lunch, coffee, notebooks, and to return a package."
           />
         </div>
 
         <Button
           onClick={onGenerate}
           disabled={loading}
-          className="w-full rounded-xl bg-yellow-400 py-6 text-base font-semibold text-black hover:bg-yellow-300"
+          className="h-14 w-full rounded-2xl bg-yellow-400 text-base font-bold text-black hover:bg-yellow-300 disabled:opacity-60"
         >
-          {loading ? "Planning your route..." : "Generate Goal Plan"}
+          {loading ? "Building your plan..." : "Generate Goal Plan"}
         </Button>
       </div>
     </section>

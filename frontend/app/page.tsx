@@ -93,7 +93,7 @@ export default function Home() {
     <main className="min-h-screen bg-neutral-950 text-white">
       <Header />
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[390px_1fr]">
+      <section className="mx-auto grid max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[420px_1fr]">
         <GoalInput
           startLocation={startLocation}
           setStartLocation={setStartLocation}
@@ -103,7 +103,7 @@ export default function Home() {
           onGenerate={generatePlan}
         />
 
-        <div className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900">
+        <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-2xl">
           <MapView stops={plan?.stops || []} route={plan?.route_geometry} />
         </div>
       </section>

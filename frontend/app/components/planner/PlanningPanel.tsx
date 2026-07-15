@@ -21,35 +21,37 @@ export default function PlanningPanel({ plan, stopCount }: Props) {
     : null;
 
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-5">
+    <section className="rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 shadow-2xl">
       <p className="text-sm font-medium text-yellow-400">Goal understood</p>
 
-      <h2 className="mt-2 text-2xl font-semibold text-white">
+      <h2 className="mt-2 text-2xl font-bold tracking-tight text-white">
         {plan.summary}
       </h2>
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-6 grid grid-cols-2 gap-3">
         <Metric label="Stops" value={`${stopCount}`} />
-        <Metric label="Estimated time" value={`${plan.total_estimated_minutes} min`} />
-        <Metric label="Driving time" value={drivingMinutes ? `${drivingMinutes} min` : "N/A"} />
+        <Metric label="Plan time" value={`${plan.total_estimated_minutes} min`} />
+        <Metric label="Driving" value={drivingMinutes ? `${drivingMinutes} min` : "N/A"} />
         <Metric label="Distance" value={distanceMiles ? `${distanceMiles} mi` : "N/A"} />
       </div>
 
-      <div className="mt-5 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
-        <p className="text-sm font-medium text-white">Why this plan?</p>
-        <p className="mt-2 text-sm leading-6 text-neutral-400">
+      <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-950 p-5">
+        <p className="text-sm font-semibold text-white">Why this plan?</p>
+        <p className="mt-3 text-sm leading-6 text-neutral-400">
           {plan.reasoning}
         </p>
       </div>
-    </div>
+    </section>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-neutral-900 p-4">
-      <p className="text-sm text-neutral-400">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-white">{value}</p>
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+      <p className="text-xs uppercase tracking-wide text-neutral-500">
+        {label}
+      </p>
+      <p className="mt-2 text-xl font-bold text-white">{value}</p>
     </div>
   );
 }
