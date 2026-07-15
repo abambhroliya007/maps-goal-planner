@@ -17,6 +17,15 @@ class PlanRequest(BaseModel):
     start_location: str
 
 
+class RoutePoint(BaseModel):
+    lat: float
+    lon: float
+
+
+class RouteRequest(BaseModel):
+    points: List[RoutePoint]
+
+
 class Stop(BaseModel):
     name: str
     query: str

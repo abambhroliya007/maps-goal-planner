@@ -21,6 +21,7 @@ type Stop = {
 
 type Props = {
   stops: Stop[];
+  onSelectAlternative: (stopIndex: number, place: PlaceOption) => void;
 };
 
 const icons = ["🍽️", "☕", "🛍️", "📦", "📍"];
@@ -30,7 +31,7 @@ function shortAddress(address?: string) {
   return address.split(",").slice(0, 3).join(",");
 }
 
-export default function TimelinePanel({ stops }: Props) {
+export default function TimelinePanel({ stops, onSelectAlternative }: Props) {
   return (
     <section className="rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 shadow-2xl">
       <div className="flex items-center justify-between">
@@ -82,7 +83,7 @@ export default function TimelinePanel({ stops }: Props) {
                   {stop.selected_place && (
                     <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                        Recommended place
+                        Selected place
                       </p>
 
                       <h4 className="mt-2 text-base font-bold text-white">
@@ -109,23 +110,29 @@ export default function TimelinePanel({ stops }: Props) {
 
                       <div className="mt-2 grid gap-2">
                         {stop.alternatives.map((place, placeIndex) => (
-                          <div
+                          <button
                             key={`${place.name}-${placeIndex}`}
-                            className="flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3"
+                            onClick={() => onSelectAlternative(index, place)}
+                            className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-left transition hover:border-yellow-400"
                           >
-                            <div>
-                              <p className="text-sm font-semibold text-white">
-                                {place.name}
-                              </p>
-                              <p className="text-xs text-neutral-500">
-                                {place.distance_miles} mi away
-                              </p>
-                            </div>
+                            <div className="flex items-center justify-between gap-4">
+                              <div>
+                                <p className="text-sm font-semibold text-white">
+                                  {place.name}
+                                </p>
+                                <p className="mt-1 text-xs text-neutral-500">
+                                  {shortAddress(place.display_name)}
+                                </p>
+                                <p className="mt-1 text-xs text-neutral-500">
+                                  {place.distance_miles} mi away
+                                </p>
+                              </div>
 
-                            <div className="rounded-full bg-neutral-950 px-3 py-1 text-xs text-neutral-300">
-                              {Math.round(place.confidence)}% match
+                              <div className="rounded-full bg-neutral-950 px-3 py-1 text-xs text-neutral-300">
+                                {Math.round(place.confidence)}% match
+                              </div>
                             </div>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     </div>

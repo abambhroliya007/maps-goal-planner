@@ -89,6 +89,66 @@ export default function Home() {
     }
   }
 
+  async function handleSelectAlternative(stopIndex: number, place: PlaceOption) {
+    if (!plan) return;
+
+    const updatedStops = plan.stops.map((stop, index) => {
+      if (index !== stopIndex) return stop;
+
+      const currentSelected = stop.selected_place;
+      const newAlternatives = [
+        ...(currentSelected ? [currentSelected] : []),
+        ...(stop.alternatives || []).filter(
+          (alternative) => alternative.display_name !== place.display_name
+        ),
+      ];
+
+      return {
+        ...stop,
+        query: place.display_name,
+        lat: place.lat,
+        lon: place.lon,
+        selected_place: place,
+        alternatives: newAlternatives,
+      };
+    });
+
+    const routePoints = updatedStops
+      .filter((stop) => stop.lat && stop.lon)
+      .map((stop) => ({
+        lat: stop.lat as number,
+        lon: stop.lon as number,
+      }));
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/v1/route", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          points: routePoints,
+        }),
+      });
+
+      const routeData = await res.json();
+
+      setPlan({
+        ...plan,
+        stops: updatedStops,
+        route_geometry: routeData.route_geometry,
+        route_distance_meters: routeData.route_distance_meters,
+        route_duration_seconds: routeData.route_duration_seconds,
+      });
+    } catch (error) {
+      console.error(error);
+      setPlan({
+        ...plan,
+        stops: updatedStops,
+      });
+    }
+  }
+
   return (
     <main className="min-h-screen bg-neutral-950 text-white">
       <Header />
@@ -117,7 +177,10 @@ export default function Home() {
       {plan && (
         <section className="mx-auto grid max-w-7xl gap-6 px-6 pb-10 lg:grid-cols-2">
           <PlanningPanel plan={plan} stopCount={plan.stops.length} />
-          <TimelinePanel stops={plan.stops} />
+          <TimelinePanel
+            stops={plan.stops}
+            onSelectAlternative={handleSelectAlternative}
+          />
         </section>
       )}
     </main>
