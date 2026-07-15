@@ -29,7 +29,9 @@ export default function TimelinePanel({ stops }: Props) {
             <p className="mt-1 text-sm text-neutral-400">
   {stop.query.split(",").slice(0, 3).join(",")}
 </p>
-            <p className="mt-3 text-sm text-neutral-300">{stop.reason}</p>
+            <p className="mt-3 text-sm text-neutral-300">
+  {stop.reason.split(" Selected ")[0]}
+</p>
             <p className="mt-3 text-sm text-neutral-500">
               Estimated stop time: {stop.estimated_minutes} min
             </p>
