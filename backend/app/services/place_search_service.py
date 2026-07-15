@@ -7,7 +7,7 @@ from app.services.ranking_service import choose_best_candidate
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
 CATEGORY_SEARCH_TERMS = {
-    "coffee": ["coffee shop", "cafe", "Starbucks"],
+    "coffee": ["Starbucks", "Peet's Coffee", "Temple Coffee Roasters", "coffee shop"],
     "food": ["restaurant", "lunch", "food"],
     "groceries": ["grocery store", "Safeway", "Trader Joe's"],
     "shipping": ["UPS Store", "FedEx Office", "shipping store"],
