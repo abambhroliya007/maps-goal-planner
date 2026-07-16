@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
 import { apiPost } from "./lib/api";
@@ -66,6 +66,13 @@ export default function Home() {
   );
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const mapKey = useMemo(() => {
+    if (!plan) return "empty-map";
+    return plan.stops
+      .map((stop) => `${stop.name}-${stop.lat}-${stop.lon}`)
+      .join("|");
+  }, [plan]);
 
   async function generatePlan() {
     setLoading(true);
@@ -145,7 +152,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#262626_0%,#0a0a0a_42%,#050505_100%)] text-white">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#24352D_0%,#0F1720_45%,#070B0E_100%)] text-[#F4EFE6]">
       <Header />
 
       <section className="mx-auto grid max-w-[1500px] gap-6 px-6 py-6 xl:grid-cols-[420px_1fr]">
@@ -166,8 +173,12 @@ export default function Home() {
           )}
         </div>
 
-        <div className="min-h-[720px] overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-900 shadow-2xl shadow-black/40">
-          <MapView stops={plan?.stops || []} route={plan?.route_geometry} />
+        <div className="min-h-[720px] overflow-hidden rounded-[2rem] border border-[#2B3A33] bg-[#121C22] shadow-2xl shadow-black/40">
+          <MapView
+            key={mapKey}
+            stops={plan?.stops || []}
+            route={plan?.route_geometry}
+          />
         </div>
       </section>
 

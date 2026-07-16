@@ -36,23 +36,23 @@ function createNumberedIcon(number: number) {
     className: "",
     html: `
       <div style="
-        height: 36px;
-        width: 36px;
+        height: 38px;
+        width: 38px;
         border-radius: 9999px;
-        background: #facc15;
-        color: #000;
+        background: #3A5A40;
+        color: #F4EFE6;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 900;
-        border: 3px solid white;
-        box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+        border: 3px solid #C89B3C;
+        box-shadow: 0 14px 30px rgba(0,0,0,0.45);
       ">
         ${number}
       </div>
     `,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
   });
 }
 
@@ -60,6 +60,8 @@ function FitBounds({ stops }: { stops: Stop[] }) {
   const map = useMap();
 
   useEffect(() => {
+    map.invalidateSize();
+
     const validStops = stops.filter((stop) => stop.lat && stop.lon);
 
     if (validStops.length > 1) {
@@ -68,8 +70,14 @@ function FitBounds({ stops }: { stops: Stop[] }) {
       );
 
       map.fitBounds(bounds, {
-        padding: [80, 80],
+        padding: [90, 90],
+        animate: true,
       });
+    } else if (validStops.length === 1) {
+      map.setView(
+        [validStops[0].lat as number, validStops[0].lon as number],
+        14
+      );
     }
   }, [map, stops]);
 
@@ -107,7 +115,7 @@ export default function MapView({ stops, route }: Props) {
     validStops.forEach((_, index) => {
       setTimeout(() => {
         setVisibleCount(index + 1);
-      }, index * 350);
+      }, index * 300);
     });
   }, [stops]);
 
@@ -151,13 +159,13 @@ export default function MapView({ stops, route }: Props) {
           <Polyline
             positions={animatedRoutePositions}
             weight={6}
-            color="#2563eb"
+            color="#3A5A40"
           />
         )}
 
         {visibleStops.map((stop, index) => (
           <Marker
-            key={`${stop.name}-${index}`}
+            key={`${stop.name}-${index}-${stop.lat}-${stop.lon}`}
             position={[stop.lat as number, stop.lon as number]}
             icon={createNumberedIcon(index + 1)}
           >

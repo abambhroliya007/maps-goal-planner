@@ -7,7 +7,7 @@ from app.services.ranking_service import rank_candidates
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
 CATEGORY_SEARCH_TERMS = {
-    "coffee_shop": ["Starbucks", "Peet's Coffee", "coffee shop", "cafe"],
+    "coffee_shop": ["Starbucks", "Dutch Bros Coffee", "Peet's Coffee", "coffee shop", "cafe", "espresso"],
     "restaurant": ["restaurant", "cafe", "sandwich shop", "Chipotle"],
     "grocery_store": ["grocery store", "Safeway", "Trader Joe's", "Walmart"],
     "warehouse_store": ["Costco", "Sam's Club", "warehouse store"],
@@ -39,10 +39,8 @@ CATEGORY_SEARCH_TERMS = {
 
 def haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     radius_miles = 3958.8
-
     phi1 = math.radians(lat1)
     phi2 = math.radians(lat2)
-
     delta_phi = math.radians(lat2 - lat1)
     delta_lambda = math.radians(lon2 - lon1)
 
@@ -52,7 +50,6 @@ def haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float
     )
 
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
     return radius_miles * c
 
 
@@ -64,7 +61,6 @@ def build_search_contexts(city_context: str) -> list[str]:
         contexts.append(", ".join(parts[-2:]))
 
     contexts.append(f"{city_context}, USA")
-
     return list(dict.fromkeys(contexts))
 
 
@@ -83,13 +79,11 @@ def search_places_near_category(
             params = {
                 "q": f"{term}, {context}",
                 "format": "json",
-                "limit": 5,
+                "limit": 10,
                 "countrycodes": "us",
             }
 
-            headers = {
-                "User-Agent": "maps-goal-planner-portfolio-project"
-            }
+            headers = {"User-Agent": "maps-goal-planner-portfolio-project"}
 
             response = requests.get(
                 NOMINATIM_URL,
@@ -107,7 +101,7 @@ def search_places_near_category(
                 lon = float(result["lon"])
                 distance = haversine_miles(start_lat, start_lon, lat, lon)
 
-                if distance > 35:
+                if distance > 75:
                     continue
 
                 candidates.append(
@@ -146,12 +140,6 @@ def get_ranked_places_for_category(
     ranked = rank_candidates(candidates)
 
     if not ranked:
-        return {
-            "selected": None,
-            "alternatives": [],
-        }
+        return {"selected": None, "alternatives": []}
 
-    return {
-        "selected": ranked[0],
-        "alternatives": ranked[1:4],
-    }
+    return {"selected": ranked[0], "alternatives": ranked[1:4]}
