@@ -24,35 +24,42 @@ def geocode_place(query: str):
     }
 
     headers = {
-        "User-Agent": "maps-goal-planner-portfolio-project"
+        "User-Agent": "maps-goal-planner-portfolio-project/1.0"
     }
 
-    response = requests.get(
-        NOMINATIM_URL,
-        params=params,
-        headers=headers,
-        timeout=10,
-    )
-    response.raise_for_status()
+    for attempt in range(3):
+        response = requests.get(
+            NOMINATIM_URL,
+            params=params,
+            headers=headers,
+            timeout=10,
+        )
 
-    data = response.json()
-    time.sleep(1)
+        if response.status_code == 429:
+            time.sleep(2 + attempt * 2)
+            continue
 
-    if not data:
-        return None
+        response.raise_for_status()
 
-    result = data[0]
+        data = response.json()
+        time.sleep(1)
 
-    return {
-        "lat": float(result["lat"]),
-        "lon": float(result["lon"]),
-        "display_name": result.get("display_name", query),
-    }
+        if not data:
+            return None
+
+        result = data[0]
+
+        return {
+            "lat": float(result["lat"]),
+            "lon": float(result["lon"]),
+            "display_name": result.get("display_name", query),
+        }
+
+    return None
 
 
 def geocode_place_near(query: str, near_location: str):
     normalized_query = query.strip().lower()
-
     fallback_terms = CATEGORY_FALLBACKS.get(normalized_query, [query])
 
     search_queries = []
@@ -71,5 +78,7 @@ def geocode_place_near(query: str, near_location: str):
 
         if location:
             return location
+
+        time.sleep(1)
 
     return None
