@@ -22,4 +22,9 @@ app.include_router(router, prefix="/api/v1")
 
 @app.get("/")
 def root():
-    return {"message": "Maps: Goal Planner API"}
+    return {"message": "Maps: Goal Planner API", "cors": "enabled-v2"}
+
+
+@app.get("/cors-test")
+def cors_test():
+    return {"cors": "enabled", "status": "ok"}
