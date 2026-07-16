@@ -11,6 +11,15 @@ type Props = {
   stopCount: number;
 };
 
+function getFinishTime(totalMinutes: number) {
+  const finish = new Date(Date.now() + totalMinutes * 60 * 1000);
+
+  return finish.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export default function PlanningPanel({ plan, stopCount }: Props) {
   const drivingMinutes = plan.route_duration_seconds
     ? Math.round(plan.route_duration_seconds / 60)
@@ -30,11 +39,28 @@ export default function PlanningPanel({ plan, stopCount }: Props) {
         {plan.summary}
       </h2>
 
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <Metric label="Stops" value={`${stopCount}`} />
-        <Metric label="Plan time" value={`${plan.total_estimated_minutes} min`} />
-        <Metric label="Driving" value={drivingMinutes ? `${drivingMinutes} min` : "N/A"} />
-        <Metric label="Distance" value={distanceMiles ? `${distanceMiles} mi` : "N/A"} />
+      <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-900/70 p-5">
+        <p className="text-sm font-semibold text-white">Route summary</p>
+
+        <div className="mt-4 grid gap-3">
+          <SummaryRow label="Stops" value={`${stopCount} planned stops`} />
+          <SummaryRow
+            label="Total plan"
+            value={`${plan.total_estimated_minutes} minutes`}
+          />
+          <SummaryRow
+            label="Driving"
+            value={drivingMinutes ? `${drivingMinutes} minutes` : "Not available"}
+          />
+          <SummaryRow
+            label="Distance"
+            value={distanceMiles ? `${distanceMiles} miles` : "Not available"}
+          />
+          <SummaryRow
+            label="Estimated finish"
+            value={`Around ${getFinishTime(plan.total_estimated_minutes)}`}
+          />
+        </div>
       </div>
 
       <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-900/70 p-5">
@@ -47,13 +73,11 @@ export default function PlanningPanel({ plan, stopCount }: Props) {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4">
-      <p className="text-xs uppercase tracking-wide text-neutral-500">
-        {label}
-      </p>
-      <p className="mt-2 text-xl font-bold text-white">{value}</p>
+    <div className="flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3">
+      <p className="text-sm text-neutral-400">{label}</p>
+      <p className="text-sm font-semibold text-white">{value}</p>
     </div>
   );
 }

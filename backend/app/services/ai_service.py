@@ -20,17 +20,17 @@ Extract the user's goal into structured trip-planning intent.
 Return JSON in this exact structure:
 
 {{
-  "summary": "short summary of the user's goal",
+  "summary": "short, polished one-sentence summary of the plan",
   "intents": [
     {{
       "label": "Get a haircut",
       "category": "barbershop",
       "estimated_minutes": 45,
-      "reason": "Why this stop is needed"
+      "reason": "short user-facing reason, under 14 words"
     }}
   ],
   "total_estimated_minutes": 120,
-  "reasoning": "Explain the suggested order at a high level."
+  "reasoning": "polished explanation of the route order in 1-2 sentences"
 }}
 
 Allowed categories:
@@ -70,7 +70,8 @@ Rules:
 - If the user says golf or 18 holes, use golf_course.
 - If the user says food, lunch, dinner, or meal, use restaurant.
 - Do not invent business names.
-- The backend will find the actual nearby location.
+- Do not mention scores, ranking, algorithms, or APIs.
+- Write reasons like a premium consumer app, not like a developer tool.
 - Return only valid JSON.
 """
 

@@ -61,11 +61,9 @@ export default function Home() {
   const [startLocation, setStartLocation] = useState(
     "Sacramento State, Sacramento, CA"
   );
-
   const [goal, setGoal] = useState(
     "I have 2 hours before class. I need lunch, coffee, notebooks, and to return a package."
   );
-
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -151,7 +149,7 @@ export default function Home() {
       <Header />
 
       <section className="mx-auto grid max-w-[1500px] gap-6 px-6 py-6 xl:grid-cols-[420px_1fr]">
-        <div className="z-10">
+        <div>
           <GoalInput
             startLocation={startLocation}
             setStartLocation={setStartLocation}

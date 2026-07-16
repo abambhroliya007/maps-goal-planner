@@ -31,18 +31,27 @@ function shortAddress(address?: string) {
   return address.split(",").slice(0, 3).join(",");
 }
 
+function matchLabel(confidence: number) {
+  if (confidence >= 95) return "Excellent match";
+  if (confidence >= 85) return "Strong match";
+  if (confidence >= 70) return "Good match";
+  return "Backup option";
+}
+
 export default function TimelinePanel({ stops, onSelectAlternative }: Props) {
   return (
-    <section className="rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 shadow-2xl">
+    <section className="rounded-[2rem] border border-neutral-800 bg-neutral-950/85 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-yellow-400">Smart timeline</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-yellow-400">
+            Smart timeline
+          </p>
           <h2 className="mt-1 text-2xl font-bold text-white">
             Recommended route
           </h2>
         </div>
 
-        <div className="rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1 text-xs text-neutral-400">
+        <div className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs text-neutral-400">
           {stops.length} stops
         </div>
       </div>
@@ -54,7 +63,7 @@ export default function TimelinePanel({ stops, onSelectAlternative }: Props) {
               <div className="absolute left-5 top-12 h-full w-px bg-neutral-800" />
             )}
 
-            <div className="relative rounded-2xl border border-neutral-800 bg-neutral-950 p-5">
+            <div className="relative rounded-2xl border border-neutral-800 bg-neutral-900/70 p-5">
               <div className="flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-yellow-400 text-lg">
                   {icons[index] || "📍"}
@@ -71,7 +80,7 @@ export default function TimelinePanel({ stops, onSelectAlternative }: Props) {
                       </h3>
                     </div>
 
-                    <div className="rounded-full bg-neutral-900 px-3 py-1 text-xs font-semibold text-neutral-300">
+                    <div className="rounded-full bg-neutral-950 px-3 py-1 text-xs font-semibold text-neutral-300">
                       {stop.estimated_minutes} min
                     </div>
                   </div>
@@ -81,23 +90,36 @@ export default function TimelinePanel({ stops, onSelectAlternative }: Props) {
                   </p>
 
                   {stop.selected_place && (
-                    <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                        Selected place
-                      </p>
+                    <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                            Selected place
+                          </p>
 
-                      <h4 className="mt-2 text-base font-bold text-white">
-                        {stop.selected_place.name}
-                      </h4>
+                          <h4 className="mt-2 text-base font-bold text-white">
+                            {stop.selected_place.name}
+                          </h4>
 
-                      <p className="mt-1 text-sm text-neutral-400">
-                        {shortAddress(stop.selected_place.display_name)}
-                      </p>
+                          <p className="mt-1 text-sm text-neutral-400">
+                            {shortAddress(stop.selected_place.display_name)}
+                          </p>
+                        </div>
 
-                      <div className="mt-4 grid grid-cols-3 gap-2">
-                        <Metric label="Score" value={`${Math.round(stop.selected_place.score)}`} />
-                        <Metric label="Match" value={`${Math.round(stop.selected_place.confidence)}%`} />
-                        <Metric label="Away" value={`${stop.selected_place.distance_miles} mi`} />
+                        <div className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-black">
+                          {matchLabel(stop.selected_place.confidence)}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid grid-cols-2 gap-2">
+                        <Metric
+                          label="Distance"
+                          value={`${stop.selected_place.distance_miles} mi`}
+                        />
+                        <Metric
+                          label="Fit score"
+                          value={`${Math.round(stop.selected_place.score)}/100`}
+                        />
                       </div>
                     </div>
                   )}
@@ -113,7 +135,7 @@ export default function TimelinePanel({ stops, onSelectAlternative }: Props) {
                           <button
                             key={`${place.name}-${placeIndex}`}
                             onClick={() => onSelectAlternative(index, place)}
-                            className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-left transition hover:border-yellow-400"
+                            className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-left transition hover:border-yellow-400"
                           >
                             <div className="flex items-center justify-between gap-4">
                               <div>
@@ -128,8 +150,8 @@ export default function TimelinePanel({ stops, onSelectAlternative }: Props) {
                                 </p>
                               </div>
 
-                              <div className="rounded-full bg-neutral-950 px-3 py-1 text-xs text-neutral-300">
-                                {Math.round(place.confidence)}% match
+                              <div className="rounded-full bg-neutral-900 px-3 py-1 text-xs text-neutral-300">
+                                {matchLabel(place.confidence)}
                               </div>
                             </div>
                           </button>
@@ -149,7 +171,7 @@ export default function TimelinePanel({ stops, onSelectAlternative }: Props) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-3">
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-3">
       <p className="text-[11px] uppercase tracking-wide text-neutral-500">
         {label}
       </p>
