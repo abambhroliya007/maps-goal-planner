@@ -3,6 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 
+import { apiPost } from "./lib/api";
 import Header from "./components/layout/Header";
 import GoalInput from "./components/planner/GoalInput";
 import PlanningPanel from "./components/planner/PlanningPanel";
@@ -47,6 +48,15 @@ type PlanResponse = {
   route_duration_seconds?: number | null;
 };
 
+type RouteResponse = {
+  route_geometry?: {
+    type: string;
+    coordinates: number[][];
+  } | null;
+  route_distance_meters?: number | null;
+  route_duration_seconds?: number | null;
+};
+
 export default function Home() {
   const [startLocation, setStartLocation] = useState(
     "Sacramento State, Sacramento, CA"
@@ -64,22 +74,14 @@ export default function Home() {
     setPlan(null);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/v1/plan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_goal: goal,
-          start_location: startLocation,
-        }),
+      const data = await apiPost<
+        PlanResponse,
+        { user_goal: string; start_location: string }
+      >("/api/v1/plan", {
+        user_goal: goal,
+        start_location: startLocation,
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to generate plan");
-      }
-
-      const data: PlanResponse = await res.json();
       setPlan(data);
     } catch (error) {
       console.error(error);
@@ -121,17 +123,12 @@ export default function Home() {
       }));
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/v1/route", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          points: routePoints,
-        }),
+      const routeData = await apiPost<
+        RouteResponse,
+        { points: { lat: number; lon: number }[] }
+      >("/api/v1/route", {
+        points: routePoints,
       });
-
-      const routeData = await res.json();
 
       setPlan({
         ...plan,
@@ -150,32 +147,34 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-white">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#262626_0%,#0a0a0a_42%,#050505_100%)] text-white">
       <Header />
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[420px_1fr]">
-        <GoalInput
-          startLocation={startLocation}
-          setStartLocation={setStartLocation}
-          goal={goal}
-          setGoal={setGoal}
-          loading={loading}
-          onGenerate={generatePlan}
-        />
+      <section className="mx-auto grid max-w-[1500px] gap-6 px-6 py-6 xl:grid-cols-[420px_1fr]">
+        <div className="z-10">
+          <GoalInput
+            startLocation={startLocation}
+            setStartLocation={setStartLocation}
+            goal={goal}
+            setGoal={setGoal}
+            loading={loading}
+            onGenerate={generatePlan}
+          />
 
-        <div className="overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-2xl">
+          {loading && (
+            <div className="mt-6">
+              <PlanningLoader />
+            </div>
+          )}
+        </div>
+
+        <div className="min-h-[720px] overflow-hidden rounded-[2rem] border border-neutral-800 bg-neutral-900 shadow-2xl shadow-black/40">
           <MapView stops={plan?.stops || []} route={plan?.route_geometry} />
         </div>
       </section>
 
-      {loading && (
-        <section className="mx-auto max-w-7xl px-6 pb-10">
-          <PlanningLoader />
-        </section>
-      )}
-
       {plan && (
-        <section className="mx-auto grid max-w-7xl gap-6 px-6 pb-10 lg:grid-cols-2">
+        <section className="mx-auto grid max-w-[1500px] gap-6 px-6 pb-10 xl:grid-cols-[0.8fr_1.2fr]">
           <PlanningPanel plan={plan} stopCount={plan.stops.length} />
           <TimelinePanel
             stops={plan.stops}

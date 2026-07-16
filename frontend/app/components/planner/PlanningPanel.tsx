@@ -21,10 +21,12 @@ export default function PlanningPanel({ plan, stopCount }: Props) {
     : null;
 
   return (
-    <section className="rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 shadow-2xl">
-      <p className="text-sm font-medium text-yellow-400">Goal understood</p>
+    <section className="rounded-[2rem] border border-neutral-800 bg-neutral-950/85 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-yellow-400">
+        Goal understood
+      </p>
 
-      <h2 className="mt-2 text-2xl font-bold tracking-tight text-white">
+      <h2 className="mt-3 text-2xl font-bold tracking-tight text-white">
         {plan.summary}
       </h2>
 
@@ -35,7 +37,7 @@ export default function PlanningPanel({ plan, stopCount }: Props) {
         <Metric label="Distance" value={distanceMiles ? `${distanceMiles} mi` : "N/A"} />
       </div>
 
-      <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-950 p-5">
+      <div className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-900/70 p-5">
         <p className="text-sm font-semibold text-white">Why this plan?</p>
         <p className="mt-3 text-sm leading-6 text-neutral-400">
           {plan.reasoning}
@@ -47,7 +49,7 @@ export default function PlanningPanel({ plan, stopCount }: Props) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4">
       <p className="text-xs uppercase tracking-wide text-neutral-500">
         {label}
       </p>

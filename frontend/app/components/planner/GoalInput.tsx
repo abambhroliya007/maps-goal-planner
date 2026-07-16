@@ -20,8 +20,8 @@ export default function GoalInput({
   onGenerate,
 }: Props) {
   return (
-    <section className="rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 shadow-2xl">
-      <div>
+    <section className="rounded-[2rem] border border-neutral-800 bg-neutral-950/85 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl">
+      <div className="rounded-2xl border border-neutral-800 bg-neutral-900/80 p-4">
         <p className="text-sm font-medium text-yellow-400">Plan smarter</p>
 
         <h2 className="mt-2 text-3xl font-bold tracking-tight text-white">
@@ -34,7 +34,7 @@ export default function GoalInput({
         </p>
       </div>
 
-      <div className="mt-7 space-y-5">
+      <div className="mt-6 space-y-5">
         <div>
           <label className="text-sm font-medium text-neutral-300">
             Starting location
@@ -42,19 +42,17 @@ export default function GoalInput({
           <input
             value={startLocation}
             onChange={(e) => setStartLocation(e.target.value)}
-            className="mt-2 w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-4 text-sm text-white outline-none transition placeholder:text-neutral-600 focus:border-yellow-400"
+            className="mt-2 w-full rounded-2xl border border-neutral-800 bg-black/40 px-4 py-4 text-sm text-white outline-none transition placeholder:text-neutral-600 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20"
             placeholder="Sacramento State, Sacramento, CA"
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium text-neutral-300">
-            Goal
-          </label>
+          <label className="text-sm font-medium text-neutral-300">Goal</label>
           <textarea
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
-            className="mt-2 min-h-40 w-full resize-none rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-4 text-sm leading-6 text-white outline-none transition placeholder:text-neutral-600 focus:border-yellow-400"
+            className="mt-2 min-h-44 w-full resize-none rounded-2xl border border-neutral-800 bg-black/40 px-4 py-4 text-sm leading-6 text-white outline-none transition placeholder:text-neutral-600 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20"
             placeholder="I have 2 hours before class. I need lunch, coffee, notebooks, and to return a package."
           />
         </div>
@@ -62,7 +60,7 @@ export default function GoalInput({
         <Button
           onClick={onGenerate}
           disabled={loading}
-          className="h-14 w-full rounded-2xl bg-yellow-400 text-base font-bold text-black hover:bg-yellow-300 disabled:opacity-60"
+          className="h-14 w-full rounded-2xl bg-yellow-400 text-base font-bold text-black shadow-lg shadow-yellow-400/20 hover:bg-yellow-300 disabled:opacity-60"
         >
           {loading ? "Building your plan..." : "Generate Goal Plan"}
         </Button>
