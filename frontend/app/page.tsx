@@ -59,7 +59,7 @@ type RouteResponse = {
 
 export default function Home() {
   const [startLocation, setStartLocation] = useState(
-    "Sacramento State, Sacramento, CA"
+    "6000 J St, Sacramento, CA 95819"
   );
   const [goal, setGoal] = useState(
     "I have 2 hours before class. I need lunch, coffee, notebooks, and to return a package."
