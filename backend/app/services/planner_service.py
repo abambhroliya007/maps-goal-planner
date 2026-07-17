@@ -4,6 +4,9 @@ from app.services.place_search_service import get_ranked_places_for_category
 from app.services.routing_service import get_route
 
 
+MAX_ROUTE_DISTANCE_MILES = 20
+
+
 def clean_place_option(place: dict) -> dict:
     return {
         "name": place.get("name"),
@@ -14,6 +17,67 @@ def clean_place_option(place: dict) -> dict:
         "score": place.get("score"),
         "confidence": place.get("confidence"),
     }
+
+
+def distance_score(current_lat: float, current_lon: float, stop: dict) -> float:
+    if stop.get("lat") is None or stop.get("lon") is None:
+        return float("inf")
+
+    return ((current_lat - stop["lat"]) ** 2 + (current_lon - stop["lon"]) ** 2) ** 0.5
+
+
+def optimize_stop_order(start_geo: dict, stops: list[dict]) -> list[dict]:
+    valid_stops = [
+        stop
+        for stop in stops
+        if stop.get("lat") is not None and stop.get("lon") is not None
+    ]
+
+    invalid_stops = [
+        stop
+        for stop in stops
+        if stop.get("lat") is None or stop.get("lon") is None
+    ]
+
+    optimized = []
+    remaining = valid_stops[:]
+
+    current_lat = start_geo["lat"]
+    current_lon = start_geo["lon"]
+
+    while remaining:
+        next_stop = min(
+            remaining,
+            key=lambda stop: distance_score(current_lat, current_lon, stop),
+        )
+
+        optimized.append(next_stop)
+        remaining.remove(next_stop)
+
+        current_lat = next_stop["lat"]
+        current_lon = next_stop["lon"]
+
+    return optimized + invalid_stops
+
+
+def should_include_in_route(stop: dict) -> bool:
+    selected = stop.get("selected_place")
+
+    if not selected:
+        return False
+
+    lat = selected.get("lat")
+    lon = selected.get("lon")
+
+    if lat is None or lon is None:
+        return False
+
+    distance = selected.get("distance_miles")
+
+    if distance is not None and distance > MAX_ROUTE_DISTANCE_MILES:
+        return False
+
+    return True
 
 
 def create_goal_plan(user_goal: str, start_location: str) -> dict:
@@ -40,12 +104,15 @@ def create_goal_plan(user_goal: str, start_location: str) -> dict:
             start_lat=start_geo["lat"],
             start_lon=start_geo["lon"],
             city_context=start_location,
+            search_query=intent.get("search_query"),
         )
 
         selected_place = ranked_places["selected"]
         alternatives = ranked_places["alternatives"]
 
         if selected_place:
+            cleaned_selected = clean_place_option(selected_place)
+
             stop = {
                 "name": intent["label"],
                 "query": selected_place["display_name"],
@@ -53,7 +120,7 @@ def create_goal_plan(user_goal: str, start_location: str) -> dict:
                 "reason": intent["reason"],
                 "lat": selected_place["lat"],
                 "lon": selected_place["lon"],
-                "selected_place": clean_place_option(selected_place),
+                "selected_place": cleaned_selected,
                 "alternatives": [
                     clean_place_option(place) for place in alternatives
                 ],
@@ -61,7 +128,7 @@ def create_goal_plan(user_goal: str, start_location: str) -> dict:
         else:
             stop = {
                 "name": intent["label"],
-                "query": intent["category"],
+                "query": intent.get("search_query") or intent["category"],
                 "estimated_minutes": intent["estimated_minutes"],
                 "reason": intent["reason"],
                 "lat": None,
@@ -72,14 +139,23 @@ def create_goal_plan(user_goal: str, start_location: str) -> dict:
 
         geocoded_stops.append(stop)
 
-    route_points = [{"lat": start_geo["lat"], "lon": start_geo["lon"]}]
+    optimized_stops = optimize_stop_order(start_geo, geocoded_stops)
 
-    for stop in geocoded_stops:
-        if stop.get("lat") and stop.get("lon"):
+    route_points = [
+        {
+            "lat": start_geo["lat"],
+            "lon": start_geo["lon"],
+        }
+    ]
+
+    for stop in optimized_stops:
+        if should_include_in_route(stop):
+            selected = stop["selected_place"]
+
             route_points.append(
                 {
-                    "lat": stop["lat"],
-                    "lon": stop["lon"],
+                    "lat": selected["lat"],
+                    "lon": selected["lon"],
                 }
             )
 
@@ -90,9 +166,10 @@ def create_goal_plan(user_goal: str, start_location: str) -> dict:
 
     return {
         "summary": ai_plan["summary"],
-        "stops": geocoded_stops,
+        "stops": optimized_stops,
         "total_estimated_minutes": ai_plan["total_estimated_minutes"],
-        "reasoning": ai_plan["reasoning"],
+        "reasoning": ai_plan["reasoning"]
+        + " The route was optimized around the most relevant nearby stops.",
         "route_geometry": route["geometry"] if route else None,
         "route_distance_meters": route["distance_meters"] if route else None,
         "route_duration_seconds": route["duration_seconds"] if route else None,

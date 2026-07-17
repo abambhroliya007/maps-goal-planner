@@ -31,55 +31,60 @@ type Props = {
   route?: RouteGeometry | null;
 };
 
-function createNumberedIcon(number: number) {
+function createWaypointIcon(label: string, type: "start" | "stop" = "stop") {
+  const bg = type === "start" ? "#C89B3C" : "#3A5A40";
+  const color = type === "start" ? "#0F1720" : "#F4EFE6";
+
   return L.divIcon({
     className: "",
     html: `
       <div style="
-        height: 38px;
-        width: 38px;
+        height: 42px;
+        width: 42px;
         border-radius: 9999px;
-        background: #3A5A40;
-        color: #F4EFE6;
+        background: ${bg};
+        color: ${color};
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 900;
-        border: 3px solid #C89B3C;
+        font-size: 14px;
+        border: 3px solid #F4EFE6;
         box-shadow: 0 14px 30px rgba(0,0,0,0.45);
       ">
-        ${number}
+        ${label}
       </div>
     `,
-    iconSize: [38, 38],
-    iconAnchor: [19, 19],
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
   });
 }
 
-function FitBounds({ stops }: { stops: Stop[] }) {
+function FitBounds({
+  positions,
+  center,
+}: {
+  positions: [number, number][];
+  center: [number, number];
+}) {
   const map = useMap();
 
   useEffect(() => {
-    map.invalidateSize();
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
 
-    const validStops = stops.filter((stop) => stop.lat && stop.lon);
-
-    if (validStops.length > 1) {
-      const bounds = validStops.map(
-        (stop) => [stop.lat as number, stop.lon as number] as [number, number]
-      );
-
-      map.fitBounds(bounds, {
+    if (positions.length >= 2) {
+      map.fitBounds(positions, {
         padding: [90, 90],
+        maxZoom: 14,
         animate: true,
       });
-    } else if (validStops.length === 1) {
-      map.setView(
-        [validStops[0].lat as number, validStops[0].lon as number],
-        14
-      );
+      return;
     }
-  }, [map, stops]);
+
+    map.setView(center, 13);
+  }, [map, positions, center]);
 
   return null;
 }
@@ -88,7 +93,9 @@ export default function MapView({ stops, route }: Props) {
   const [visibleCount, setVisibleCount] = useState(0);
   const [routeProgress, setRouteProgress] = useState(0);
 
-  const validStops = stops.filter((stop) => stop.lat && stop.lon);
+  const validStops = stops.filter(
+    (stop) => typeof stop.lat === "number" && typeof stop.lon === "number"
+  );
 
   const routePositions = useMemo(() => {
     return (
@@ -97,6 +104,24 @@ export default function MapView({ stops, route }: Props) {
       ) || []
     );
   }, [route]);
+
+  const startPosition: [number, number] | null =
+    routePositions.length > 0 ? routePositions[0] : null;
+
+  const stopPositions = validStops.map(
+    (stop) => [stop.lat as number, stop.lon as number] as [number, number]
+  );
+
+  const allMapPositions = [
+    ...(startPosition ? [startPosition] : []),
+    ...stopPositions,
+  ];
+
+  const center: [number, number] =
+    startPosition ||
+    (validStops.length > 0
+      ? [validStops[0].lat as number, validStops[0].lon as number]
+      : [38.5816, -121.4944]);
 
   const animatedRoutePositions = useMemo(() => {
     if (routePositions.length === 0) return [];
@@ -138,43 +163,62 @@ export default function MapView({ stops, route }: Props) {
     return () => clearInterval(interval);
   }, [routePositions]);
 
-  const center: [number, number] =
-    validStops.length > 0
-      ? [validStops[0].lat as number, validStops[0].lon as number]
-      : [38.5816, -121.4944];
-
   const visibleStops = validStops.slice(0, visibleCount);
 
   return (
     <div className="h-full min-h-[720px] w-full overflow-hidden rounded-[2rem]">
-      <MapContainer center={center} zoom={12} className="h-full w-full">
+      <MapContainer center={center} zoom={13} className="h-full w-full">
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <FitBounds stops={validStops} />
+        <FitBounds positions={allMapPositions} center={center} />
 
-        {animatedRoutePositions.length > 0 && (
-          <Polyline
-            positions={animatedRoutePositions}
-            weight={6}
-            color="#3A5A40"
-          />
+        {animatedRoutePositions.length > 1 && (
+          <>
+            <Polyline
+              positions={animatedRoutePositions}
+              weight={10}
+              color="#C89B3C"
+              opacity={0.35}
+            />
+            <Polyline
+              positions={animatedRoutePositions}
+              weight={5}
+              color="#3A5A40"
+              opacity={0.95}
+            />
+          </>
+        )}
+
+        {startPosition && (
+          <Marker
+            position={startPosition}
+            icon={createWaypointIcon("S", "start")}
+          >
+            <Popup>
+              <strong>Start</strong>
+              <br />
+              Starting location
+            </Popup>
+          </Marker>
         )}
 
         {visibleStops.map((stop, index) => (
           <Marker
             key={`${stop.name}-${index}-${stop.lat}-${stop.lon}`}
             position={[stop.lat as number, stop.lon as number]}
-            icon={createNumberedIcon(index + 1)}
+            icon={createWaypointIcon(String(index + 1), "stop")}
           >
             <Popup>
               <strong>
-                {index + 1}. {stop.name}
+                Stop {index + 1}: {stop.name}
               </strong>
               <br />
               {stop.query.split(",").slice(0, 3).join(",")}
+              <br />
+              <span>{stop.estimated_minutes} min planned</span>
             </Popup>
           </Marker>
         ))}

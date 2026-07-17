@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 export async function apiPost<TResponse, TBody>(
   endpoint: string,
@@ -14,7 +13,8 @@ export async function apiPost<TResponse, TBody>(
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    const errorText = await response.text();
+    throw new Error(`API request failed: ${response.status} - ${errorText}`);
   }
 
   return response.json();

@@ -16,44 +16,70 @@ CATEGORY_FALLBACKS = {
 
 
 def geocode_place(query: str):
-    params = {
-        "q": query,
-        "format": "json",
-        "limit": 1,
-        "countrycodes": "us",
+    normalized = query.strip().lower()
+
+    sac_state_location = {
+        "lat": 38.5602,
+        "lon": -121.4241,
+        "display_name": "California State University, Sacramento, 6000 J Street, Sacramento, CA",
     }
+
+    sac_state_keywords = [
+        "sacramento state",
+        "sac state",
+        "csus",
+        "california state university sacramento",
+        "6000 j street",
+        "6000 j st",
+    ]
+
+    for keyword in sac_state_keywords:
+        if keyword in normalized:
+            return sac_state_location
+
+    search_queries = [
+        query,
+        f"{query}, USA",
+        f"{query}, California, USA",
+    ]
 
     headers = {
         "User-Agent": "maps-goal-planner-portfolio-project/1.0"
     }
 
-    for attempt in range(3):
-        response = requests.get(
-            NOMINATIM_URL,
-            params=params,
-            headers=headers,
-            timeout=10,
-        )
-
-        if response.status_code == 429:
-            time.sleep(2 + attempt * 2)
-            continue
-
-        response.raise_for_status()
-
-        data = response.json()
-        time.sleep(1)
-
-        if not data:
-            return None
-
-        result = data[0]
-
-        return {
-            "lat": float(result["lat"]),
-            "lon": float(result["lon"]),
-            "display_name": result.get("display_name", query),
+    for search_query in search_queries:
+        params = {
+            "q": search_query,
+            "format": "json",
+            "limit": 1,
+            "countrycodes": "us",
         }
+
+        for attempt in range(3):
+            response = requests.get(
+                NOMINATIM_URL,
+                params=params,
+                headers=headers,
+                timeout=10,
+            )
+
+            if response.status_code == 429:
+                time.sleep(2 + attempt * 2)
+                continue
+
+            response.raise_for_status()
+
+            data = response.json()
+            time.sleep(1)
+
+            if data:
+                result = data[0]
+
+                return {
+                    "lat": float(result["lat"]),
+                    "lon": float(result["lon"]),
+                    "display_name": result.get("display_name", search_query),
+                }
 
     return None
 
